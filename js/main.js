@@ -44,7 +44,8 @@ const subtitleLocales = {
 	Chinese: 'zh-Hans',
 	TraditionalChinese: 'zh-Hant',
 	Japanese: 'ja',
-	Korean: 'ko'
+	Korean: 'ko',
+	Thai: 'th'
 };
 
 const CHARACTER = 'CH0291';
@@ -61,12 +62,12 @@ const AUDIO_DETAIL = [
 				"はっ、入りました！ギリギリ、ですが……。"
 			],
 			English: [
-				"Ngh... hmph! Nnnngh...",
-				"Hah, it's on! It's... a tight fit, though."
+				"Hup... Huut! Ugh...",
+				"I-It fits! It's a little tight... However..."
 			],
 			Chinese: [
-				"咕……嗯！嗯……",
-				"哈，穿上了！勉强……"
+				"呼！唔呃呃……啊！",
+				"穿，穿进去了！虽然有点紧……"
 			],
 			TraditionalChinese: [
 				"咕……哼！唔唔唔……",
@@ -75,7 +76,8 @@ const AUDIO_DETAIL = [
 			Korean: [
 				"흣…… 후읏! 우으읏…….",
 				"드, 들어갔습니다! 아슬아슬…… 하지만……."
-			]
+			],
+			Thai: ["ฮะ... ฮึบบ! อึกก...","สะ... ใส่ได้แล้วค่ะ! ถึงจะได้แบบ... หวุดหวิดก็เถอะ..."]
 		}
 	},
 	{
@@ -86,14 +88,14 @@ const AUDIO_DETAIL = [
 				"ございません！"
 			],
 			English: [
-				"As you can see!",
-				"There is no problem...",
-				"At all!"
+				"You can see with your own eyes...",
+				"...that it's completely fine!",
+				"I can wear it!"
 			],
 			Chinese: [
-				"如您所见！",
-				"什么问题！",
-				"也没有！"
+				"但您看！",
+				"要穿上！",
+				"是没有问题的！"
 			],
 			TraditionalChinese: [
 				"但如您所見！",
@@ -104,7 +106,8 @@ const AUDIO_DETAIL = [
 				"보시다시피!",
 				"착용에는!",
 				"문제없습니다!"
-			]
+			],
+			Thai: ["อย่างที่เห็นว่า!","ชุดนี้ใส่ได้!","ไม่มีปัญหาค่ะ!"]
 		}
 	},
 	{
@@ -113,17 +116,18 @@ const AUDIO_DETAIL = [
 				"もう少し体を絞れば、ジャストサイズになります！"
 			],
 			English: [
-				"If I just slim down a little more, it'll be a perfect fit!"
+				"It just requires a little adjustment, and it's the perfect size!"
 			],
 			Chinese: [
-				"再稍微瘦一点就刚刚好了！"
+				"只要稍微瘦一点，尺码就刚刚好了……！"
 			],
 			TraditionalChinese: [
 				"只要再稍微瘦身一下，尺寸就剛剛好了！"
 			],
 			Korean: [
 				"조금만 관리한다면, 딱 맞는 사이즈이니까요……!"
-			]
+			],
+			Thai: ["แค่ฉันดูแลตัวเองอีกหน่อย ไซซ์ก็จะพอดีเลยค่ะ...!"]
 		}
 	},
 	{
@@ -132,17 +136,18 @@ const AUDIO_DETAIL = [
 				"大丈夫です！水着はこれにします！"
 			],
 			English: [
-				"It's fine! I'm taking this swimsuit!"
+				"I am perfectly calm! I would like this swimsuit!"
 			],
 			Chinese: [
-				"没关系！泳装就要这件了！"
+				"我很冷静！就选这件了！"
 			],
 			TraditionalChinese: [
 				"沒問題的！泳裝就決定是這件了！"
 			],
 			Korean: [
 				"전 침착합니다! 수영복은 이걸로 하겠습니다!"
-			]
+			],
+			Thai: ["ฉันใจเย็นอยู่ค่ะ! ฉันเอาชุดว่ายน้ำชุดนี้ค่ะ!"]
 		}
 	},
 	{
@@ -151,17 +156,18 @@ const AUDIO_DETAIL = [
 				"むしろ、これが良いんです……！"
 			],
 			English: [
-				"On the contrary, this is what makes it so good...!"
+				"In fact, I am going to wear just this!"
 			],
 			Chinese: [
-				"不如说，这样正好……！"
+				"不如说，非得这件不可……！"
 			],
 			TraditionalChinese: [
 				"應該說，我就要這件……！"
 			],
 			Korean: [
 				"오히려, 이것만 입겠습니다……!"
-			]
+			],
+			Thai: ["ฉันจะใส่แต่ชุดนี้เลยค่ะ...!"]
 		}
 	}
 ];
@@ -273,7 +279,7 @@ function playVoiceline() {
 			track.play().catch(finish);
 
 			if (dialogBox) {
-				textbox.textContent = dialog[window.selectedLanguage][index];
+				textbox.textContent = getSubtitleText(dialog, window.selectedLanguage, index);
 				textbox.style.opacity = 1;
 			}
 		},
@@ -443,6 +449,16 @@ function setMouse(event) {
 	return { x: ax - canvas.width * positionX, y: ay - canvas.height * positionY };
 }
 
+function getSubtitleText(dialog, language, index) {
+	let text = dialog?.[language]?.[index];
+	if (text == null && language === 'Thai') {
+		language = 'English';
+		text = dialog?.[language]?.[index];
+	}
+	textbox.lang = subtitleLocales[language];
+	return text ?? "";
+}
+
 function updateSubtitleLanguage() {
 	let language = subtitleLanguagePreference;
 	if (language === 'auto') {
@@ -456,6 +472,8 @@ function updateSubtitleLanguage() {
 			language = 'Japanese';
 		} else if (primary === 'ko' || primary === 'korean' || primary === 'koreana') {
 			language = 'Korean';
+		} else if (primary === 'th' || primary === 'thai') {
+			language = 'Thai';
 		} else {
 			language = 'English';
 		}
@@ -465,7 +483,7 @@ function updateSubtitleLanguage() {
 	window.selectedLanguage = language;
 	textbox.lang = subtitleLocales[language];
 	const clip = currentTracks.at(-1);
-	if (dialogBox && clip) textbox.textContent = clip.dialog[language][clip.index];
+	if (dialogBox && clip) textbox.textContent = getSubtitleText(clip.dialog, language, clip.index);
 }
 
 function init() {
